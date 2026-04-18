@@ -47,7 +47,8 @@ div[data-testid="stDecoration"] {
     padding: 1rem 2rem 3rem !important;
     max-width: 1350px !important;
 }
-#MainMenu, footer, header { visibility: hidden !important; }
+#MainMenu, footer { visibility: hidden !important; }
+[data-testid="stHeader"] { background-color: transparent !important; }
 .stDeployButton { display: none !important; }
 
 /* ─ Sidebar ─ */
