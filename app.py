@@ -496,6 +496,16 @@ def make_widget(feat, encoders, ci):
     """Render a selectbox/slider. Returns current value."""
     label = DISPLAY.get(feat, feat)
     cur   = ci.get(feat, DEFAULTS.get(feat))
+
+    # Special case: vehicles involved — use a friendly labelled selectbox
+    if feat == "Number_of_vehicles_involved":
+        _icons = ["🚗", "🚗🚗", "🚗🚗🚗", "🚗🚗🚗🚗", "🚗×5", "🚗×6", "🚗×7"]
+        _labels = [f"{n}  {_icons[n-1]}" for n in range(1, 8)]
+        cur_int = int(cur) if cur else 2
+        idx     = max(0, min(cur_int - 1, 6))
+        chosen  = st.selectbox(label, _labels, index=idx)
+        return int(chosen.split()[0])
+
     if feat in encoders:
         opts = list(encoders[feat].classes_)
         idx  = opts.index(cur) if cur in opts else 0
