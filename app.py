@@ -79,8 +79,52 @@ div[data-baseweb="popover"] ul {
     font-size: .83rem !important;
     font-weight: 600 !important;
 }
-/* Slider track */
-.stSlider div[data-baseweb="slider"] div { background: #1e293b !important; }
+/* ─ Slider — premium styled ─ */
+.stSlider div[data-baseweb="slider"] { padding: 0 4px !important; }
+/* track background */
+.stSlider [data-testid="stSlider"] > div > div > div > div:first-child {
+    background: #1e293b !important;
+    height: 6px !important;
+    border-radius: 6px !important;
+}
+/* filled portion */
+.stSlider [data-testid="stSlider"] > div > div > div > div:nth-child(2) {
+    background: linear-gradient(90deg, #4f46e5, #7c3aed) !important;
+    height: 6px !important;
+    border-radius: 6px !important;
+}
+/* thumb */
+.stSlider [role="slider"] {
+    background: #7c3aed !important;
+    border: 3px solid #a5b4fc !important;
+    box-shadow: 0 0 10px rgba(124,58,237,.7) !important;
+    width: 22px !important;
+    height: 22px !important;
+    top: -8px !important;
+}
+/* value tooltip */
+.stSlider [data-testid="stTickBar"] { color: #475569 !important; font-size: .72rem !important; }
+/* vehicle-slider badge wrapper */
+.veh-slider-wrap { position: relative; }
+.veh-badge {
+    display: inline-block;
+    background: linear-gradient(135deg,#312e81,#4c1d95);
+    border: 1px solid #4338ca;
+    color: #a5b4fc !important;
+    font-size: .95rem; font-weight: 800;
+    padding: .25rem .9rem;
+    border-radius: 50px;
+    box-shadow: 0 0 12px rgba(99,102,241,.3);
+    margin-bottom: .2rem;
+}
+.veh-ticks {
+    display: flex; justify-content: space-between;
+    padding: 0 2px; margin-top: .15rem;
+}
+.veh-ticks span {
+    font-size: .68rem; color: #475569 !important;
+    font-weight: 600; text-align: center; width: 14%;
+}
 /* Checkbox */
 .stCheckbox span[data-baseweb="checkbox"] { background: #111827 !important; border-color: #334155 !important; }
 
@@ -497,14 +541,19 @@ def make_widget(feat, encoders, ci):
     label = DISPLAY.get(feat, feat)
     cur   = ci.get(feat, DEFAULTS.get(feat))
 
-    # Special case: vehicles involved — use a friendly labelled selectbox
+    # Special case: vehicles involved — styled slider with badge + tick labels
     if feat == "Number_of_vehicles_involved":
-        _icons = ["🚗", "🚗🚗", "🚗🚗🚗", "🚗🚗🚗🚗", "🚗×5", "🚗×6", "🚗×7"]
-        _labels = [f"{n}  {_icons[n-1]}" for n in range(1, 8)]
         cur_int = int(cur) if cur else 2
-        idx     = max(0, min(cur_int - 1, 6))
-        chosen  = st.selectbox(label, _labels, index=idx)
-        return int(chosen.split()[0])
+        val = st.slider(label, 1, 7, cur_int)
+        # Live badge + tick labels
+        st.markdown(
+            f'<div class="veh-badge">🚙 {val} vehicle{"s" if val > 1 else ""} involved</div>'
+            f'<div class="veh-ticks">'
+            + "".join(f'<span style="color:{"#a5b4fc" if i==val else "#475569"} !important;font-weight:{"800" if i==val else "500"}">{i}</span>' for i in range(1, 8))
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+        return val
 
     if feat in encoders:
         opts = list(encoders[feat].classes_)
